@@ -15,6 +15,7 @@ import (
 	authlib "github.com/grafana/authlib/types"
 
 	provisioning "github.com/grafana/grafana/apps/provisioning/pkg/apis/provisioning/v0alpha1"
+	"github.com/grafana/grafana/apps/provisioning/pkg/util/ptr"
 	"github.com/grafana/grafana/pkg/apimachinery/identity"
 )
 
@@ -34,7 +35,7 @@ func TestValidateJob(t *testing.T) {
 				},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionPull,
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 					Pull: &provisioning.JobSyncJobOptions{
 						Incremental: true,
 					},
@@ -49,7 +50,7 @@ func TestValidateJob(t *testing.T) {
 					Name: "test-job",
 				},
 				Spec: provisioning.JobSpec{
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 				},
 			},
 			wantErr: true,
@@ -65,7 +66,7 @@ func TestValidateJob(t *testing.T) {
 				},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobAction("invalid"),
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 				},
 			},
 			wantErr: true,
@@ -99,7 +100,7 @@ func TestValidateJob(t *testing.T) {
 				},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionPull,
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 				},
 			},
 			wantErr: true,
@@ -115,7 +116,7 @@ func TestValidateJob(t *testing.T) {
 				},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionPush,
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 				},
 			},
 			wantErr: true,
@@ -131,10 +132,10 @@ func TestValidateJob(t *testing.T) {
 				},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionPush,
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 					Push: &provisioning.JobExportJobOptions{
-						Branch:  "main",
-						Message: "Test commit",
+						Branch:  new("main"),
+						Message: new("Test commit"),
 					},
 				},
 			},
@@ -148,10 +149,10 @@ func TestValidateJob(t *testing.T) {
 				},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionPush,
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 					Push: &provisioning.JobExportJobOptions{
-						Branch:  "feature..branch", // Invalid: contains consecutive dots
-						Message: "Test commit",
+						Branch:  new("feature..branch"), // Invalid: contains consecutive dots
+						Message: new("Test commit"),
 					},
 				},
 			},
@@ -169,10 +170,10 @@ func TestValidateJob(t *testing.T) {
 				},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionPush,
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 					Push: &provisioning.JobExportJobOptions{
-						Path:    "../../../etc/passwd", // Invalid: path traversal
-						Message: "Test commit",
+						Path:    new("../../../etc/passwd"), // Invalid: path traversal
+						Message: new("Test commit"),
 					},
 				},
 			},
@@ -189,7 +190,7 @@ func TestValidateJob(t *testing.T) {
 				},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionDelete,
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 				},
 			},
 			wantErr: true,
@@ -205,7 +206,7 @@ func TestValidateJob(t *testing.T) {
 				},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionDelete,
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 					Delete:     &provisioning.JobDeleteJobOptions{},
 				},
 			},
@@ -222,7 +223,7 @@ func TestValidateJob(t *testing.T) {
 				},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionDelete,
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 					Delete: &provisioning.JobDeleteJobOptions{
 						Paths: []string{"dashboard.json", "folder/other.json"},
 					},
@@ -238,12 +239,12 @@ func TestValidateJob(t *testing.T) {
 				},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionDelete,
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 					Delete: &provisioning.JobDeleteJobOptions{
 						Resources: []provisioning.JobResourceRef{
 							{
-								Name: "my-dashboard",
-								Kind: "Dashboard",
+								Name: new("my-dashboard"),
+								Kind: new("Dashboard"),
 							},
 						},
 					},
@@ -259,7 +260,7 @@ func TestValidateJob(t *testing.T) {
 				},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionDelete,
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 					Delete: &provisioning.JobDeleteJobOptions{
 						Paths: []string{"../../etc/passwd"}, // Invalid: path traversal
 					},
@@ -278,11 +279,11 @@ func TestValidateJob(t *testing.T) {
 				},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionDelete,
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 					Delete: &provisioning.JobDeleteJobOptions{
 						Resources: []provisioning.JobResourceRef{
 							{
-								Kind: "Dashboard",
+								Kind: new("Dashboard"),
 							},
 						},
 					},
@@ -301,7 +302,7 @@ func TestValidateJob(t *testing.T) {
 				},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionMove,
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 				},
 			},
 			wantErr: true,
@@ -317,9 +318,9 @@ func TestValidateJob(t *testing.T) {
 				},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionMove,
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 					Move: &provisioning.JobMoveJobOptions{
-						TargetPath: "new-location/",
+						TargetPath: new("new-location/"),
 					},
 				},
 			},
@@ -336,7 +337,7 @@ func TestValidateJob(t *testing.T) {
 				},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionMove,
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 					Move: &provisioning.JobMoveJobOptions{
 						Paths: []string{"dashboard.json"},
 					},
@@ -355,10 +356,10 @@ func TestValidateJob(t *testing.T) {
 				},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionMove,
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 					Move: &provisioning.JobMoveJobOptions{
 						Paths:      []string{"old-location/dashboard.json"},
-						TargetPath: "new-location/",
+						TargetPath: new("new-location/"),
 					},
 				},
 			},
@@ -372,10 +373,10 @@ func TestValidateJob(t *testing.T) {
 				},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionMove,
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 					Move: &provisioning.JobMoveJobOptions{
 						Paths:      []string{"dashboard.json"},
-						TargetPath: "../../../etc/", // Invalid: path traversal
+						TargetPath: new("../../../etc/"), // Invalid: path traversal
 					},
 				},
 			},
@@ -392,9 +393,9 @@ func TestValidateJob(t *testing.T) {
 				},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionMigrate,
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 					Migrate: &provisioning.JobMigrateJobOptions{
-						Message: "Migrate from unified",
+						Message: new("Migrate from unified"),
 					},
 				},
 			},
@@ -406,11 +407,11 @@ func TestValidateJob(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{Name: "test-job"},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionMigrate,
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 					Migrate: &provisioning.JobMigrateJobOptions{
 						Resources: []provisioning.JobResourceRef{
-							{Name: "dash-1", Kind: "Dashboard"},
-							{Name: "dash-2", Kind: "Dashboard", Group: "dashboard.grafana.app"},
+							{Name: new("dash-1"), Kind: new("Dashboard")},
+							{Name: new("dash-2"), Kind: new("Dashboard"), Group: new("dashboard.grafana.app")},
 						},
 					},
 				},
@@ -423,8 +424,8 @@ func TestValidateJob(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{Name: "test-job"},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionMigrate,
-					Repository: "test-repo",
-					Migrate:    &provisioning.JobMigrateJobOptions{Branch: "feature-x"},
+					Repository: new("test-repo"),
+					Migrate:    &provisioning.JobMigrateJobOptions{Branch: new("feature-x")},
 				},
 			},
 			wantErr: false,
@@ -435,8 +436,8 @@ func TestValidateJob(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{Name: "test-job"},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionMigrate,
-					Repository: "test-repo",
-					Migrate:    &provisioning.JobMigrateJobOptions{Branch: "feature..branch"}, // Invalid: consecutive dots
+					Repository: new("test-repo"),
+					Migrate:    &provisioning.JobMigrateJobOptions{Branch: new("feature..branch")}, // Invalid: consecutive dots
 				},
 			},
 			wantErr: true,
@@ -451,9 +452,9 @@ func TestValidateJob(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{Name: "test-job"},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionMigrate,
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 					Migrate: &provisioning.JobMigrateJobOptions{
-						Resources: []provisioning.JobResourceRef{{Kind: "Dashboard"}},
+						Resources: []provisioning.JobResourceRef{{Kind: new("Dashboard")}},
 					},
 				},
 			},
@@ -468,9 +469,9 @@ func TestValidateJob(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{Name: "test-job"},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionMigrate,
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 					Migrate: &provisioning.JobMigrateJobOptions{
-						Resources: []provisioning.JobResourceRef{{Name: "dash-1"}},
+						Resources: []provisioning.JobResourceRef{{Name: new("dash-1")}},
 					},
 				},
 			},
@@ -485,9 +486,9 @@ func TestValidateJob(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{Name: "test-job"},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionMigrate,
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 					Migrate: &provisioning.JobMigrateJobOptions{
-						Resources: []provisioning.JobResourceRef{{Name: "folder-1", Kind: "Folder"}},
+						Resources: []provisioning.JobResourceRef{{Name: new("folder-1"), Kind: new("Folder")}},
 					},
 				},
 			},
@@ -503,9 +504,9 @@ func TestValidateJob(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{Name: "test-job"},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionMigrate,
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 					Migrate: &provisioning.JobMigrateJobOptions{
-						Resources: []provisioning.JobResourceRef{{Name: "dash-1", Kind: "Dashboard", Group: "folder.grafana.app"}},
+						Resources: []provisioning.JobResourceRef{{Name: new("dash-1"), Kind: new("Dashboard"), Group: new("folder.grafana.app")}},
 					},
 				},
 			},
@@ -522,7 +523,7 @@ func TestValidateJob(t *testing.T) {
 				},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionMigrate,
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 				},
 			},
 			wantErr: true,
@@ -538,10 +539,10 @@ func TestValidateJob(t *testing.T) {
 				},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionPullRequest,
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 					PullRequest: &provisioning.JobPullRequestJobOptions{
-						PR:  123,
-						Ref: "refs/pull/123/head",
+						PR:  new(int32(123)),
+						Ref: new("refs/pull/123/head"),
 					},
 				},
 			},
@@ -555,11 +556,11 @@ func TestValidateJob(t *testing.T) {
 				},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionDelete,
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 					Delete: &provisioning.JobDeleteJobOptions{
 						Resources: []provisioning.JobResourceRef{
 							{
-								Name: "my-dashboard",
+								Name: new("my-dashboard"),
 							},
 						},
 					},
@@ -578,15 +579,15 @@ func TestValidateJob(t *testing.T) {
 				},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionMove,
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 					Move: &provisioning.JobMoveJobOptions{
 						Resources: []provisioning.JobResourceRef{
 							{
-								Name: "my-dashboard",
-								Kind: "Dashboard",
+								Name: new("my-dashboard"),
+								Kind: new("Dashboard"),
 							},
 						},
-						TargetPath: "new-location/",
+						TargetPath: new("new-location/"),
 					},
 				},
 			},
@@ -600,14 +601,14 @@ func TestValidateJob(t *testing.T) {
 				},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionMove,
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 					Move: &provisioning.JobMoveJobOptions{
 						Resources: []provisioning.JobResourceRef{
 							{
-								Name: "my-dashboard",
+								Name: new("my-dashboard"),
 							},
 						},
-						TargetPath: "new-location/",
+						TargetPath: new("new-location/"),
 					},
 				},
 			},
@@ -624,16 +625,16 @@ func TestValidateJob(t *testing.T) {
 				},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionMove,
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 					Move: &provisioning.JobMoveJobOptions{
 						Paths: []string{"dashboard.json"},
 						Resources: []provisioning.JobResourceRef{
 							{
-								Name: "my-dashboard",
-								Kind: "Dashboard",
+								Name: new("my-dashboard"),
+								Kind: new("Dashboard"),
 							},
 						},
-						TargetPath: "new-location/",
+						TargetPath: new("new-location/"),
 					},
 				},
 			},
@@ -647,10 +648,10 @@ func TestValidateJob(t *testing.T) {
 				},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionMove,
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 					Move: &provisioning.JobMoveJobOptions{
 						Paths:      []string{"../invalid/path"},
-						TargetPath: "valid/target/",
+						TargetPath: new("valid/target/"),
 					},
 				},
 			},
@@ -667,13 +668,13 @@ func TestValidateJob(t *testing.T) {
 				},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionDelete,
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 					Delete: &provisioning.JobDeleteJobOptions{
 						Paths: []string{"dashboard.json"},
 						Resources: []provisioning.JobResourceRef{
 							{
-								Name: "my-dashboard",
-								Kind: "Dashboard",
+								Name: new("my-dashboard"),
+								Kind: new("Dashboard"),
 							},
 						},
 					},
@@ -687,11 +688,11 @@ func TestValidateJob(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{Name: "test-job"},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionPush,
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 					Push: &provisioning.JobExportJobOptions{
 						Resources: []provisioning.JobResourceRef{
-							{Name: "dash-1", Kind: "Dashboard"},
-							{Name: "dash-2", Kind: "Dashboard", Group: "dashboard.grafana.app"},
+							{Name: new("dash-1"), Kind: new("Dashboard")},
+							{Name: new("dash-2"), Kind: new("Dashboard"), Group: new("dashboard.grafana.app")},
 						},
 					},
 				},
@@ -704,9 +705,9 @@ func TestValidateJob(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{Name: "test-job"},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionPush,
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 					Push: &provisioning.JobExportJobOptions{
-						Resources: []provisioning.JobResourceRef{{Kind: "Dashboard"}},
+						Resources: []provisioning.JobResourceRef{{Kind: new("Dashboard")}},
 					},
 				},
 			},
@@ -721,9 +722,9 @@ func TestValidateJob(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{Name: "test-job"},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionPush,
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 					Push: &provisioning.JobExportJobOptions{
-						Resources: []provisioning.JobResourceRef{{Name: "dash-1"}},
+						Resources: []provisioning.JobResourceRef{{Name: new("dash-1")}},
 					},
 				},
 			},
@@ -738,9 +739,9 @@ func TestValidateJob(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{Name: "test-job"},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionPush,
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 					Push: &provisioning.JobExportJobOptions{
-						Resources: []provisioning.JobResourceRef{{Name: "folder-1", Kind: "Folder"}},
+						Resources: []provisioning.JobResourceRef{{Name: new("folder-1"), Kind: new("Folder")}},
 					},
 				},
 			},
@@ -756,9 +757,9 @@ func TestValidateJob(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{Name: "test-job"},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionPush,
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 					Push: &provisioning.JobExportJobOptions{
-						Resources: []provisioning.JobResourceRef{{Name: "dash-1", Kind: "Dashboard", Group: "folder.grafana.app"}},
+						Resources: []provisioning.JobResourceRef{{Name: new("dash-1"), Kind: new("Dashboard"), Group: new("folder.grafana.app")}},
 					},
 				},
 			},
@@ -773,11 +774,11 @@ func TestValidateJob(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{Name: "test-job"},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionPush,
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 					Push: &provisioning.JobExportJobOptions{
 						Resources: []provisioning.JobResourceRef{
-							{Name: "pl-1", Kind: "Playlist"},
-							{Name: "pl-2", Kind: "Playlist", Group: "playlist.grafana.app"},
+							{Name: new("pl-1"), Kind: new("Playlist")},
+							{Name: new("pl-2"), Kind: new("Playlist"), Group: new("playlist.grafana.app")},
 						},
 					},
 				},
@@ -793,9 +794,9 @@ func TestValidateJob(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{Name: "test-job"},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionMigrate,
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 					Migrate: &provisioning.JobMigrateJobOptions{
-						Resources: []provisioning.JobResourceRef{{Name: "pl-1", Kind: "Playlist", Group: "playlist.grafana.app"}},
+						Resources: []provisioning.JobResourceRef{{Name: new("pl-1"), Kind: new("Playlist"), Group: new("playlist.grafana.app")}},
 					},
 				},
 			},
@@ -810,9 +811,9 @@ func TestValidateJob(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{Name: "test-job"},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionPush,
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 					Push: &provisioning.JobExportJobOptions{
-						Resources: []provisioning.JobResourceRef{{Name: "dash-1", Kind: "Dashboard"}},
+						Resources: []provisioning.JobResourceRef{{Name: new("dash-1"), Kind: new("Dashboard")}},
 					},
 				},
 			},
@@ -831,9 +832,9 @@ func TestValidateJob(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{Name: "test-job"},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionPush,
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 					Push: &provisioning.JobExportJobOptions{
-						Resources: []provisioning.JobResourceRef{{Name: "pl-1", Kind: "Playlist"}},
+						Resources: []provisioning.JobResourceRef{{Name: new("pl-1"), Kind: new("Playlist")}},
 					},
 				},
 			},
@@ -851,10 +852,10 @@ func TestValidateJob(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{Name: "test-job"},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionPush,
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 					Push: &provisioning.JobExportJobOptions{
 						Resources: []provisioning.JobResourceRef{
-							{Name: "ds-1", Kind: "DataSource", Group: "prometheus.datasource.grafana.app"},
+							{Name: new("ds-1"), Kind: new("DataSource"), Group: new("prometheus.datasource.grafana.app")},
 						},
 					},
 				},
@@ -870,9 +871,9 @@ func TestValidateJob(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{Name: "test-job"},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionPush,
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 					Push: &provisioning.JobExportJobOptions{
-						Resources: []provisioning.JobResourceRef{{Name: "ds-1", Kind: "DataSource"}},
+						Resources: []provisioning.JobResourceRef{{Name: new("ds-1"), Kind: new("DataSource")}},
 					},
 				},
 			},
@@ -892,10 +893,10 @@ func TestValidateJob(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{Name: "test-job"},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionPush,
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 					Push: &provisioning.JobExportJobOptions{
 						Resources: []provisioning.JobResourceRef{
-							{Name: "ds-1", Kind: "DataSource", Group: "prometheus.datasource.grafana.app"},
+							{Name: new("ds-1"), Kind: new("DataSource"), Group: new("prometheus.datasource.grafana.app")},
 						},
 					},
 				},
@@ -918,9 +919,9 @@ func TestValidateJob(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{Name: "test-job"},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionPush,
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 					Push: &provisioning.JobExportJobOptions{
-						Resources: []provisioning.JobResourceRef{{Name: "ds-1", Kind: "DataSource"}},
+						Resources: []provisioning.JobResourceRef{{Name: new("ds-1"), Kind: new("DataSource")}},
 					},
 				},
 			},
@@ -940,10 +941,10 @@ func TestValidateJob(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{Name: "test-job"},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionPush,
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 					Push: &provisioning.JobExportJobOptions{
 						Resources: []provisioning.JobResourceRef{
-							{Name: "ds-1", Kind: "DataSource", Group: "datasource.grafana.app"},
+							{Name: new("ds-1"), Kind: new("DataSource"), Group: new("datasource.grafana.app")},
 						},
 					},
 				},
@@ -962,9 +963,9 @@ func TestValidateJob(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{Name: "test-job"},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionMigrate,
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 					Migrate: &provisioning.JobMigrateJobOptions{
-						Resources: []provisioning.JobResourceRef{{Name: "pl-1", Kind: "Playlist", Group: "wrong.grafana.app"}},
+						Resources: []provisioning.JobResourceRef{{Name: new("pl-1"), Kind: new("Playlist"), Group: new("wrong.grafana.app")}},
 					},
 				},
 			},
@@ -984,10 +985,10 @@ func TestValidateJob(t *testing.T) {
 				},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionPush,
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 					Push: &provisioning.JobExportJobOptions{
-						Path:    "some/valid/path",
-						Message: "Test commit",
+						Path:    new("some/valid/path"),
+						Message: new("Test commit"),
 					},
 				},
 			},
@@ -1001,7 +1002,7 @@ func TestValidateJob(t *testing.T) {
 				},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionFixFolderMetadata,
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 				},
 			},
 			wantErr: false,
@@ -1014,7 +1015,7 @@ func TestValidateJob(t *testing.T) {
 				},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionReleaseResources,
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 				},
 			},
 			wantErr: false,
@@ -1027,7 +1028,7 @@ func TestValidateJob(t *testing.T) {
 				},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionDeleteResources,
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 				},
 			},
 			wantErr: false,
@@ -1040,7 +1041,7 @@ func TestValidateJob(t *testing.T) {
 				},
 				Spec: provisioning.JobSpec{
 					Action:            provisioning.JobActionFixFolderMetadata,
-					Repository:        "test-repo",
+					Repository:        new("test-repo"),
 					FixFolderMetadata: &provisioning.JobFixFolderMetadataJobOptions{},
 				},
 			},
@@ -1052,7 +1053,7 @@ func TestValidateJob(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{Name: "test-job"},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionPush,
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 					Push: &provisioning.JobExportJobOptions{
 						Resources: makeDashboardRefs(MaxSelectiveExportResources),
 					},
@@ -1066,7 +1067,7 @@ func TestValidateJob(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{Name: "test-job"},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionPush,
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 					Push: &provisioning.JobExportJobOptions{
 						Resources: makeDashboardRefs(MaxSelectiveExportResources + 1),
 					},
@@ -1084,7 +1085,7 @@ func TestValidateJob(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{Name: "test-job"},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionMigrate,
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 					Migrate: &provisioning.JobMigrateJobOptions{
 						Resources: makeDashboardRefs(MaxSelectiveExportResources + 1),
 					},
@@ -1102,7 +1103,7 @@ func TestValidateJob(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{Name: "test-job"},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionTest,
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 					Test:       &provisioning.JobTestJobOptions{Duration: metav1.Duration{Duration: 10 * time.Second}},
 				},
 			},
@@ -1114,7 +1115,7 @@ func TestValidateJob(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{Name: "test-job"},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionTest,
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 				},
 			},
 			wantErr: true,
@@ -1128,7 +1129,7 @@ func TestValidateJob(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{Name: "test-job"},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionTest,
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 					Test:       &provisioning.JobTestJobOptions{Duration: metav1.Duration{Duration: 0}},
 				},
 			},
@@ -1144,7 +1145,7 @@ func TestValidateJob(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{Name: "test-job"},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionTest,
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 					Test:       &provisioning.JobTestJobOptions{Duration: metav1.Duration{Duration: MaxTestJobDuration + time.Second}},
 				},
 			},
@@ -1160,10 +1161,10 @@ func TestValidateJob(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{Name: "test-job"},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionTest,
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 					Test: &provisioning.JobTestJobOptions{
 						Duration:        metav1.Duration{Duration: 10 * time.Second},
-						ProgressUpdates: -1,
+						ProgressUpdates: new(int32(-1)),
 					},
 				},
 			},
@@ -1179,11 +1180,11 @@ func TestValidateJob(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{Name: "test-job"},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionTest,
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 					Test: &provisioning.JobTestJobOptions{
 						// 1s / 100 updates = 10ms apart, far below the throttle.
 						Duration:        metav1.Duration{Duration: time.Second},
-						ProgressUpdates: 100,
+						ProgressUpdates: new(int32(100)),
 					},
 				},
 			},
@@ -1199,11 +1200,11 @@ func TestValidateJob(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{Name: "test-job"},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionTest,
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 					Test: &provisioning.JobTestJobOptions{
 						// 10s / 20 updates = 500ms apart, exactly deliverable.
 						Duration:        metav1.Duration{Duration: 10 * time.Second},
-						ProgressUpdates: 20,
+						ProgressUpdates: new(int32(20)),
 					},
 				},
 			},
@@ -1215,10 +1216,10 @@ func TestValidateJob(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{Name: "test-job"},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionTest,
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 					Test: &provisioning.JobTestJobOptions{
 						Duration:        metav1.Duration{Duration: 10 * time.Second},
-						ProgressUpdates: MaxTestJobProgressUpdates + 1,
+						ProgressUpdates: new(int32(MaxTestJobProgressUpdates + 1)),
 					},
 				},
 			},
@@ -1260,7 +1261,7 @@ func TestAdmissionValidator_Validate(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{Name: "test-job"},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionPull,
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 					Pull:       &provisioning.JobSyncJobOptions{Incremental: true},
 				},
 			},
@@ -1274,7 +1275,7 @@ func TestAdmissionValidator_Validate(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{Name: "test-job"},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionTest,
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 					Test:       &provisioning.JobTestJobOptions{Duration: metav1.Duration{Duration: 10 * time.Second}},
 				},
 			},
@@ -1289,7 +1290,7 @@ func TestAdmissionValidator_Validate(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{Name: "test-job"},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionTest,
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 					Test:       &provisioning.JobTestJobOptions{Duration: metav1.Duration{Duration: 10 * time.Second}},
 				},
 			},
@@ -1303,7 +1304,7 @@ func TestAdmissionValidator_Validate(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{Name: "test-job"},
 				Spec: provisioning.JobSpec{
 					// Missing action
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 				},
 			},
 			operation:   admission.Create,
@@ -1335,7 +1336,7 @@ func TestAdmissionValidator_Validate(t *testing.T) {
 				},
 				Spec: provisioning.JobSpec{
 					// Invalid - missing action
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 				},
 			},
 			operation:   admission.Update,
@@ -1381,9 +1382,9 @@ func TestAdmissionValidator_ReadsTheSupportedResourcesOnEachValidation(t *testin
 		ObjectMeta: metav1.ObjectMeta{Name: "test-job"},
 		Spec: provisioning.JobSpec{
 			Action:     provisioning.JobActionPush,
-			Repository: "test-repo",
+			Repository: new("test-repo"),
 			Push: &provisioning.JobExportJobOptions{
-				Resources: []provisioning.JobResourceRef{{Name: "widget-1", Kind: "Widget", Group: "example.ext.grafana.app"}},
+				Resources: []provisioning.JobResourceRef{{Name: new("widget-1"), Kind: new("Widget"), Group: new("example.ext.grafana.app")}},
 			},
 		},
 	}
@@ -1425,7 +1426,7 @@ func TestHistoricJobAdmissionValidator_Validate(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{Name: "test-historic-job"},
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionPull,
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 				},
 			},
 			operation: admission.Create,
@@ -1436,7 +1437,7 @@ func TestHistoricJobAdmissionValidator_Validate(t *testing.T) {
 			obj: &provisioning.HistoricJob{
 				ObjectMeta: metav1.ObjectMeta{Name: "test-historic-job"},
 				Spec: provisioning.JobSpec{
-					Repository: "test-repo",
+					Repository: new("test-repo"),
 				},
 			},
 			operation:       admission.Create,
@@ -1515,7 +1516,7 @@ func TestHistoricJobAdmissionValidator_Validate(t *testing.T) {
 func makeDashboardRefs(n int) []provisioning.JobResourceRef {
 	refs := make([]provisioning.JobResourceRef, n)
 	for i := range refs {
-		refs[i] = provisioning.JobResourceRef{Name: fmt.Sprintf("dash-%d", i), Kind: "Dashboard"}
+		refs[i] = provisioning.JobResourceRef{Name: ptr.NonZero(fmt.Sprintf("dash-%d", i)), Kind: new("Dashboard")}
 	}
 	return refs
 }
