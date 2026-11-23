@@ -1104,7 +1104,7 @@ func TestValidateJob(t *testing.T) {
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionTest,
 					Repository: new("test-repo"),
-					Test:       &provisioning.JobTestJobOptions{Duration: metav1.Duration{Duration: 10 * time.Second}},
+					Test:       &provisioning.JobTestJobOptions{Duration: new((10 * time.Second).String())},
 				},
 			},
 			wantErr: false,
@@ -1130,7 +1130,7 @@ func TestValidateJob(t *testing.T) {
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionTest,
 					Repository: new("test-repo"),
-					Test:       &provisioning.JobTestJobOptions{Duration: metav1.Duration{Duration: 0}},
+					Test:       &provisioning.JobTestJobOptions{Duration: new("0s")},
 				},
 			},
 			wantErr: true,
@@ -1146,7 +1146,7 @@ func TestValidateJob(t *testing.T) {
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionTest,
 					Repository: new("test-repo"),
-					Test:       &provisioning.JobTestJobOptions{Duration: metav1.Duration{Duration: MaxTestJobDuration + time.Second}},
+					Test:       &provisioning.JobTestJobOptions{Duration: new((MaxTestJobDuration + time.Second).String())},
 				},
 			},
 			wantErr: true,
@@ -1163,7 +1163,7 @@ func TestValidateJob(t *testing.T) {
 					Action:     provisioning.JobActionTest,
 					Repository: new("test-repo"),
 					Test: &provisioning.JobTestJobOptions{
-						Duration:        metav1.Duration{Duration: 10 * time.Second},
+						Duration:        new((10 * time.Second).String()),
 						ProgressUpdates: new(int32(-1)),
 					},
 				},
@@ -1183,7 +1183,7 @@ func TestValidateJob(t *testing.T) {
 					Repository: new("test-repo"),
 					Test: &provisioning.JobTestJobOptions{
 						// 1s / 100 updates = 10ms apart, far below the throttle.
-						Duration:        metav1.Duration{Duration: time.Second},
+						Duration:        new((time.Second).String()),
 						ProgressUpdates: new(int32(100)),
 					},
 				},
@@ -1203,7 +1203,7 @@ func TestValidateJob(t *testing.T) {
 					Repository: new("test-repo"),
 					Test: &provisioning.JobTestJobOptions{
 						// 10s / 20 updates = 500ms apart, exactly deliverable.
-						Duration:        metav1.Duration{Duration: 10 * time.Second},
+						Duration:        new((10 * time.Second).String()),
 						ProgressUpdates: new(int32(20)),
 					},
 				},
@@ -1218,7 +1218,7 @@ func TestValidateJob(t *testing.T) {
 					Action:     provisioning.JobActionTest,
 					Repository: new("test-repo"),
 					Test: &provisioning.JobTestJobOptions{
-						Duration:        metav1.Duration{Duration: 10 * time.Second},
+						Duration:        new((10 * time.Second).String()),
 						ProgressUpdates: new(int32(MaxTestJobProgressUpdates + 1)),
 					},
 				},
@@ -1276,7 +1276,7 @@ func TestAdmissionValidator_Validate(t *testing.T) {
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionTest,
 					Repository: new("test-repo"),
-					Test:       &provisioning.JobTestJobOptions{Duration: metav1.Duration{Duration: 10 * time.Second}},
+					Test:       &provisioning.JobTestJobOptions{Duration: new((10 * time.Second).String())},
 				},
 			},
 			operation:       admission.Create,
@@ -1291,7 +1291,7 @@ func TestAdmissionValidator_Validate(t *testing.T) {
 				Spec: provisioning.JobSpec{
 					Action:     provisioning.JobActionTest,
 					Repository: new("test-repo"),
-					Test:       &provisioning.JobTestJobOptions{Duration: metav1.Duration{Duration: 10 * time.Second}},
+					Test:       &provisioning.JobTestJobOptions{Duration: new((10 * time.Second).String())},
 				},
 			},
 			operation:   admission.Create,
@@ -1424,8 +1424,8 @@ func TestHistoricJobAdmissionValidator_Validate(t *testing.T) {
 			name: "valid historic job passes validation",
 			obj: &provisioning.HistoricJob{
 				ObjectMeta: metav1.ObjectMeta{Name: "test-historic-job"},
-				Spec: provisioning.JobSpec{
-					Action:     provisioning.JobActionPull,
+				Spec: provisioning.HistoricJobSpec{
+					Action:     provisioning.HistoricJobActionPull,
 					Repository: new("test-repo"),
 				},
 			},
@@ -1436,7 +1436,7 @@ func TestHistoricJobAdmissionValidator_Validate(t *testing.T) {
 			name: "historic job missing action fails validation",
 			obj: &provisioning.HistoricJob{
 				ObjectMeta: metav1.ObjectMeta{Name: "test-historic-job"},
-				Spec: provisioning.JobSpec{
+				Spec: provisioning.HistoricJobSpec{
 					Repository: new("test-repo"),
 				},
 			},
@@ -1448,8 +1448,8 @@ func TestHistoricJobAdmissionValidator_Validate(t *testing.T) {
 			name: "historic job missing repository fails validation",
 			obj: &provisioning.HistoricJob{
 				ObjectMeta: metav1.ObjectMeta{Name: "test-historic-job"},
-				Spec: provisioning.JobSpec{
-					Action: provisioning.JobActionPull,
+				Spec: provisioning.HistoricJobSpec{
+					Action: provisioning.HistoricJobActionPull,
 				},
 			},
 			operation:       admission.Create,
@@ -1477,7 +1477,7 @@ func TestHistoricJobAdmissionValidator_Validate(t *testing.T) {
 					Name:              "test-historic-job",
 					DeletionTimestamp: &metav1.Time{Time: time.Now()},
 				},
-				Spec: provisioning.JobSpec{
+				Spec: provisioning.HistoricJobSpec{
 					// Invalid - missing action and repository
 				},
 			},
