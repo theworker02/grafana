@@ -196,7 +196,7 @@ func TestClientsServeManifestKindsFromTheAggregatedServer(t *testing.T) {
 	require.NoError(t, err)
 
 	require.Equal(t, "Bearer token-for-grafana", router.AccessToken("/apis/discovery/v1alpha2/manifests"))
-	require.Equal(t, "Bearer token-for-"+stubRouterGroup+","+apisprovisioning.GROUP, router.AccessToken("/apis/"+stubRouterGroup+"/v1/namespaces/default/widgets"))
+	require.Equal(t, "Bearer token-for-"+stubRouterGroup, router.AccessToken("/apis/"+stubRouterGroup+"/v1/namespaces/default/widgets"))
 }
 
 func TestClientsUseTheRouterForDashboards(t *testing.T) {
@@ -216,7 +216,7 @@ func TestClientsUseTheRouterForDashboards(t *testing.T) {
 	_, err = client.List(t.Context(), metav1.ListOptions{})
 	require.NoError(t, err)
 
-	require.Equal(t, "Bearer token-for-dashboard.grafana.app,"+apisprovisioning.GROUP, router.AccessToken(dashboards))
+	require.Equal(t, "Bearer token-for-dashboard.grafana.app", router.AccessToken(dashboards))
 }
 
 func TestClientsWithoutAnAggregatedServer(t *testing.T) {

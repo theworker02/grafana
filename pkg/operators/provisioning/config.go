@@ -297,7 +297,7 @@ func (c *ControllerConfig) Clients() (resources.ClientFactory, error) {
 		Host:    aggregatedServerURL,
 		WrapTransport: clientauth.NewTokenExchangeTransportWrapper(
 			tokenExchangeClient,
-			clientauth.NewRequestGroupAudienceProvider(setting.ExtJWTAccessTokenExpectAudience, provisioning.GROUP),
+			clientauth.NewRequestGroupAudienceProvider(setting.ExtJWTAccessTokenExpectAudience),
 			clientauth.NewStaticNamespaceProvider(clientauth.WildcardNamespace),
 		),
 		Transport: &http.Transport{
