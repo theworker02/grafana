@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/grafana/authlib/types"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"github.com/grafana/grafana/pkg/services/accesscontrol"
@@ -39,21 +40,41 @@ type aliasFilteringStore struct {
 }
 
 func (s *aliasFilteringStore) SearchUsersPermissions(_ context.Context, _ int64, options accesscontrol.SearchOptions) (map[int64][]accesscontrol.Permission, error) {
-	require.Equal(s.t, "teams:id:42", options.Scope, "legacy storage must receive the numeric equivalent of the UID filter")
+	assert.Equal(s.t, "teams:id:42", options.Scope, "legacy storage must receive the numeric equivalent of the UID filter")
 	return map[int64][]accesscontrol.Permission{2: {{Action: "teams:read", Scope: "teams:id:42"}}}, nil
 }
 
 func TestPermissionSearchResolvesUIDFilterBeforeLegacyStorage(t *testing.T) {
+	runPermissionSearchTransports(t, testPermissionSearchResolvesUIDFilterBeforeLegacyStorage)
+}
+
+func runPermissionSearchTransports(t *testing.T, test func(*testing.T)) {
+	t.Helper()
+	for _, mode := range []struct {
+		name string
+		grpc bool
+	}{{"direct", false}, {"grpc", true}} {
+		t.Run(mode.name, func(t *testing.T) {
+			featuremgmt.WithFlagValues(t, map[string]any{featuremgmt.FlagAuthzLegacyUserPermissionsSearch: mode.grpc})
+			test(t)
+		})
+	}
+}
+
+func testPermissionSearchResolvesUIDFilterBeforeLegacyStorage(t *testing.T) {
 	store := &aliasFilteringStore{FakeStore: actest.FakeStore{ExpectedUsersRoles: map[int64][]string{2: {"Viewer"}}}, t: t}
 	service := setupServiceWithFakeStore(t, store, nil, nil)
 	service.roles = map[string]*accesscontrol.RoleDTO{"Viewer": {}}
-	service.scopeResolver = localScopeResolver(func(_ context.Context, _ types.NamespaceInfo, ref legacyscopes.ScopeReference) (string, error) {
+	service.cfg.StackID = "12"
+	service.legacyClient = legacypermissions.NewEmbeddedClient(nil, service.cfg)
+	service.scopeResolver = localScopeResolver(func(_ context.Context, ns types.NamespaceInfo, ref legacyscopes.ScopeReference) (string, error) {
+		assert.Equal(t, "stacks-12", ns.Value)
 		if ref.Attribute == "uid" {
 			return "42", nil
 		}
 		return "platform", nil
 	})
-	got, err := service.SearchUsersPermissions(t.Context(), &user.SignedInUser{OrgID: 1, Namespace: "default"}, accesscontrol.SearchOptions{UserID: 2, Action: "teams:read", Scope: "teams:uid:platform"})
+	got, err := service.SearchUsersPermissions(t.Context(), &user.SignedInUser{OrgID: 1, Namespace: "stacks-12"}, accesscontrol.SearchOptions{UserID: 2, Action: "teams:read", Scope: "teams:uid:platform"})
 	require.NoError(t, err)
 	require.Equal(t, map[int64][]accesscontrol.Permission{2: {{Action: "teams:read", Scope: "teams:uid:platform"}}}, got)
 }

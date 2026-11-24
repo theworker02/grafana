@@ -22,6 +22,7 @@ import (
 	"github.com/grafana/grafana/pkg/services/accesscontrol/permreg"
 	"github.com/grafana/grafana/pkg/services/accesscontrol/resourcepermissions"
 	authzextv1 "github.com/grafana/grafana/pkg/services/authz/proto/v1"
+	"github.com/grafana/grafana/pkg/services/authz/rbac/legacypermissions"
 	"github.com/grafana/grafana/pkg/services/authz/zanzana"
 	"github.com/grafana/grafana/pkg/services/authz/zanzana/client"
 	"github.com/grafana/grafana/pkg/services/featuremgmt"
@@ -444,6 +445,10 @@ func TestService_GetUserPermissions_DoesNotCacheZanzanaWhenPermissionCacheDisabl
 }
 
 func TestService_SearchUsersPermissions_MergesLegacyAndZanzana(t *testing.T) {
+	runPermissionSearchTransports(t, testSearchMergesLegacyAndZanzana)
+}
+
+func testSearchMergesLegacyAndZanzana(t *testing.T) {
 	store := &actest.FakeStore{
 		ExpectedUsersPermissions: map[int64][]accesscontrol.Permission{
 			2: {{Action: "dashboards:read", Scope: "dashboards:uid:legacy"}},
@@ -460,6 +465,7 @@ func TestService_SearchUsersPermissions_MergesLegacyAndZanzana(t *testing.T) {
 	}
 
 	svc := setupServiceWithFakeStore(t, store, zClient, mockUserSvc)
+	svc.legacyClient = legacypermissions.NewEmbeddedClient(nil, svc.cfg)
 
 	siu := &user.SignedInUser{
 		OrgID:       1,
@@ -482,6 +488,10 @@ func TestService_SearchUsersPermissions_MergesLegacyAndZanzana(t *testing.T) {
 }
 
 func TestService_SearchUsersPermissions_UsesLegacyWhenZanzanaFails(t *testing.T) {
+	runPermissionSearchTransports(t, testSearchUsesLegacyWhenZanzanaFails)
+}
+
+func testSearchUsesLegacyWhenZanzanaFails(t *testing.T) {
 	store := &actest.FakeStore{
 		ExpectedUsersPermissions: map[int64][]accesscontrol.Permission{
 			2: {{Action: "dashboards:read", Scope: "dashboards:uid:legacy"}},
@@ -498,6 +508,7 @@ func TestService_SearchUsersPermissions_UsesLegacyWhenZanzanaFails(t *testing.T)
 	}
 
 	svc := setupServiceWithFakeStore(t, store, zClient, mockUserSvc)
+	svc.legacyClient = legacypermissions.NewEmbeddedClient(nil, svc.cfg)
 
 	siu := &user.SignedInUser{
 		OrgID:       1,

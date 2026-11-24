@@ -98,12 +98,15 @@ func NewEmbeddedClient(loader *Loader, cfg *setting.Cfg) legacyclient.LegacyUser
 			// Preserve their SQL session without forwarding unrelated context values.
 			// Receiver renames refresh permissions after the outermost transaction commits.
 			// No other caller is known to read permissions inside a transaction.
-			if sess, ok := clientCtx.Value(sqlstore.ContextSessionKey{}).(*sqlstore.DBSession); ok && sess != nil {
+			sess, _ := clientCtx.Value(sqlstore.ContextSessionKey{}).(*sqlstore.DBSession)
+			if sess != nil || info.FullMethod == authzv1.LegacyAuthzService_LegacySearchUsersPermissions_FullMethodName {
 				call, ok := clientCtx.Value(embeddedTransactionCallKey{}).(*embeddedTransactionCall)
 				if !ok || !call.start() {
-					return status.Error(codes.Canceled, "embedded transaction call already returned")
+					return status.Error(codes.Canceled, "embedded call already returned")
 				}
 				defer close(call.done)
+			}
+			if sess != nil {
 				ctx = context.WithValue(ctx, sqlstore.ContextSessionKey{}, sess)
 			}
 		}

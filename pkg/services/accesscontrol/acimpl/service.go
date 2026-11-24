@@ -789,6 +789,13 @@ func (s *Service) SearchUsersPermissions(ctx context.Context, usr identity.Reque
 	ctx, span := tracer.Start(ctx, "accesscontrol.acimpl.SearchUsersPermissions")
 	defer span.End()
 
+	if LegacyUserPermissionsSearchEnabled(ctx) {
+		return SearchUsersPermissionsViaLegacyClient(ctx, s.legacyClient, usr, options, s.searchUsersPermissions)
+	}
+	return s.searchUsersPermissions(ctx, usr, options)
+}
+
+func (s *Service) searchUsersPermissions(ctx context.Context, usr identity.Requester, options accesscontrol.SearchOptions) (map[int64][]accesscontrol.Permission, error) {
 	originalScope := options.Scope
 	scope, err := legacyscopes.LegacySearchScope(ctx, usr, s.scopeResolver, originalScope)
 	if err != nil {

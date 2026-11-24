@@ -1205,6 +1205,15 @@ var (
 			Generate:     Generate{Go: true},
 		},
 		{
+			Name:         "authz.legacyUserPermissionsSearch",
+			Description:  "Route legacy user permission searches through embedded AuthZ.",
+			Stage:        FeatureStageExperimental,
+			Owner:        identityAccessTeam,
+			HideFromDocs: true,
+			Expression:   "false",
+			Generate:     Generate{Go: true},
+		},
+		{
 			Name:         "authz.legacyUserPermissions",
 			Description:  "Load legacy Access Control permissions through embedded AuthZ.",
 			Stage:        FeatureStageExperimental,

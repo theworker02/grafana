@@ -17,7 +17,11 @@ import (
 )
 
 func TestIntegrationSearchUsersPermissions_TargetAuthorization(t *testing.T) {
-	f := newSearchPermissionsFixture(t)
+	runSearchTransports(t, testPermissionSearchTargetAuthorization)
+}
+
+func testPermissionSearchTargetAuthorization(t *testing.T, enabled bool) {
+	f := newSearchPermissionsFixture(t, enabled)
 	usr := f.createUser(t, user.CreateUserCommand{UID: "target", OrgID: f.orgID, DefaultOrgRole: "None"})
 	role := f.createRole(t, f.orgID, "managed:target", []accesscontrol.Permission{{Action: "test:read", Scope: "tests:id:one"}})
 	f.assignUser(t, f.orgID, usr.ID, role)
@@ -43,7 +47,11 @@ func TestIntegrationSearchUsersPermissions_TargetAuthorization(t *testing.T) {
 }
 
 func TestIntegrationSearchUsersPermissions_NonPositiveTargetsWithFilters(t *testing.T) {
-	f := newSearchPermissionsFixture(t)
+	runSearchTransports(t, testPermissionSearchNonPositiveTargetsWithFilters)
+}
+
+func testPermissionSearchNonPositiveTargetsWithFilters(t *testing.T, enabled bool) {
+	f := newSearchPermissionsFixture(t, enabled)
 	want := searchPermissionsResponse{}
 	for _, uid := range []string{"alice", "bob"} {
 		usr := f.createUser(t, user.CreateUserCommand{UID: uid, OrgID: f.orgID, DefaultOrgRole: "None"})
@@ -64,7 +72,11 @@ func TestIntegrationSearchUsersPermissions_NonPositiveTargetsWithFilters(t *test
 }
 
 func TestIntegrationSearchUsersPermissions_UnfilteredActionSets(t *testing.T) {
-	f := newSearchPermissionsFixture(t)
+	runSearchTransports(t, testPermissionSearchUnfilteredActionSets)
+}
+
+func testPermissionSearchUnfilteredActionSets(t *testing.T, enabled bool) {
+	f := newSearchPermissionsFixture(t, enabled)
 	usr := f.createUser(t, user.CreateUserCommand{UID: "target", OrgID: f.orgID, DefaultOrgRole: "None"})
 	f.actions.StoreActionSet("dashboards:edit", []string{"dashboards:read", "dashboards:write"})
 	role := f.createRole(t, f.orgID, "managed:sets", []accesscontrol.Permission{
@@ -91,7 +103,11 @@ func TestIntegrationSearchUsersPermissions_UnfilteredActionSets(t *testing.T) {
 }
 
 func TestIntegrationSearchUsersPermissions_ActionPrefixCharacters(t *testing.T) {
-	f := newSearchPermissionsFixture(t)
+	runSearchTransports(t, testPermissionSearchActionPrefixCharacters)
+}
+
+func testPermissionSearchActionPrefixCharacters(t *testing.T, enabled bool) {
+	f := newSearchPermissionsFixture(t, enabled)
 	usr := f.createUser(t, user.CreateUserCommand{UID: "viewer", OrgID: f.orgID, DefaultOrgRole: "Viewer"})
 	require.NoError(t, f.service.DeclareFixedRoles(accesscontrol.RoleRegistration{
 		Role:   accesscontrol.RoleDTO{Name: "fixed:test:prefix", Permissions: []accesscontrol.Permission{{Action: "test:read", Scope: "tests:id:static"}}},
@@ -132,6 +148,10 @@ func TestIntegrationSearchUsersPermissions_ActionPrefixCharacters(t *testing.T) 
 }
 
 func TestIntegrationSearchUsersPermissions_CacheHitsAndExpiry(t *testing.T) {
+	runSearchTransports(t, testPermissionSearchCacheHitsAndExpiry)
+}
+
+func testPermissionSearchCacheHitsAndExpiry(t *testing.T, enabled bool) {
 	const (
 		grantChange                = "grant"
 		revokeChange               = "revoke"
@@ -143,7 +163,7 @@ func TestIntegrationSearchUsersPermissions_CacheHitsAndExpiry(t *testing.T) {
 
 	for _, change := range []string{grantChange, revokeChange, teamMembershipChange, removeTeamMembershipChange, basicRoleChange, downgradeBasicRoleChange} {
 		t.Run(change, func(t *testing.T) {
-			f := newSearchPermissionsFixture(t)
+			f := newSearchPermissionsFixture(t, enabled)
 			usr := f.createUser(t, user.CreateUserCommand{UID: "target", OrgID: f.orgID, DefaultOrgRole: "None"})
 			role := f.createRole(t, f.orgID, "managed:read", []accesscontrol.Permission{{Action: "test:read", Scope: "tests:id:one"}})
 
