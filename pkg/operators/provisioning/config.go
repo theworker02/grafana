@@ -28,7 +28,6 @@ import (
 	"github.com/grafana/grafana/pkg/storage/unified"
 	"github.com/grafana/grafana/pkg/storage/unified/resource"
 
-	"github.com/grafana/grafana-app-sdk/logging"
 	provisioning "github.com/grafana/grafana/apps/provisioning/pkg/apis/provisioning/v0alpha1"
 	"github.com/grafana/grafana/apps/provisioning/pkg/connection"
 	githubconnection "github.com/grafana/grafana/apps/provisioning/pkg/connection/github"
@@ -279,6 +278,9 @@ func (c *ControllerConfig) Clients() (resources.ClientFactory, error) {
 	}
 
 	aggregatedServerURL := operatorSec.Key("aggregated_server_url").String()
+	if aggregatedServerURL == "" {
+		return nil, fmt.Errorf("aggregated_server_url is required in [operator] section")
+	}
 
 	supportedResourceProvider, err := c.NewSupportedResourceProvider()
 	if err != nil {
@@ -290,29 +292,22 @@ func (c *ControllerConfig) Clients() (resources.ClientFactory, error) {
 		return nil, fmt.Errorf("failed to convert TLS config for transport: %w", err)
 	}
 
-	newConfigProvider := func(url string, audiences ...string) apiserver.RestConfigProvider {
-		return NewDirectConfigProvider(&rest.Config{
-			APIPath: "/apis",
-			Host:    url,
-			WrapTransport: clientauth.NewTokenExchangeTransportWrapper(
-				tokenExchangeClient,
-				clientauth.NewStaticAudienceProvider(audiences...),
-				clientauth.NewStaticNamespaceProvider(clientauth.WildcardNamespace),
-			),
-			Transport: &http.Transport{
-				MaxConnsPerHost:     100,
-				MaxIdleConns:        100,
-				MaxIdleConnsPerHost: 100,
-				TLSClientConfig:     tlsConfigForTransport,
-			},
-			RateLimiter: flowcontrol.NewFakeAlwaysRateLimiter(),
-		})
+	config := &rest.Config{
+		APIPath: "/apis",
+		Host:    aggregatedServerURL,
+		WrapTransport: clientauth.NewTokenExchangeTransportWrapper(
+			tokenExchangeClient,
+			clientauth.NewStaticAudienceProvider(provisioning.GROUP, resources.DashboardResource.Group, resources.FolderResource.Group),
+			clientauth.NewStaticNamespaceProvider(clientauth.WildcardNamespace),
+		),
+		Transport: &http.Transport{
+			MaxConnsPerHost:     100,
+			MaxIdleConns:        100,
+			MaxIdleConnsPerHost: 100,
+			TLSClientConfig:     tlsConfigForTransport,
+		},
+		RateLimiter: flowcontrol.NewFakeAlwaysRateLimiter(),
 	}
-
-	if aggregatedServerURL == "" {
-		return nil, fmt.Errorf("aggregated_server_url is required in [operator] section")
-	}
-	clients := resources.NewClientFactory(newConfigProvider(aggregatedServerURL, provisioning.GROUP, resources.DashboardResource.Group, resources.FolderResource.Group), supportedResourceProvider)
 
 	c.manifestWatcher, err = resources.NewRemoteManifestWatcher(supportedResourceProvider, c.Registry(), resource.ManifestWatcherConfig{
 		DiscoveryURL:      aggregatedServerURL,
@@ -325,6 +320,7 @@ func (c *ControllerConfig) Clients() (resources.ClientFactory, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to create manifest watcher: %w", err)
 	}
+	clients := resources.NewClientFactory(NewDirectConfigProvider(config), supportedResourceProvider)
 	c.clients = clients
 	return clients, nil
 }
@@ -488,20 +484,13 @@ func (c *ControllerConfig) FreshnessMetrics() *informer.FreshnessMetrics {
 	return c.freshness
 }
 
-// ProvisioningKeysLister returns a keys lister for one kind when [provisioning]
-// keys_only_relist is set, and nil otherwise, which keeps the full-object
-// re-list.
-func (c *ControllerConfig) ProvisioningKeysLister(logger logging.Logger, gvr schema.GroupVersionResource) (keysapi.Lister, error) {
-	if !c.Settings.SectionWithEnvOverrides("provisioning").Key("keys_only_relist").MustBool(false) {
-		return nil, nil
-	}
-
+// ProvisioningKeysLister returns the keys lister the informer re-list reads one
+// kind through.
+func (c *ControllerConfig) ProvisioningKeysLister(gvr schema.GroupVersionResource) (keysapi.Lister, error) {
 	restClient, err := c.ProvisioningRESTClient()
 	if err != nil {
 		return nil, fmt.Errorf("failed to create provisioning REST client: %w", err)
 	}
-
-	logger.Info("provisioning re-list will ask for keys only", "transport", "http", "resource", gvr.Resource)
 
 	return keysapi.NewHTTPLister(restClient, gvr), nil
 }
