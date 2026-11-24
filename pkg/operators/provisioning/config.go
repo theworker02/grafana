@@ -260,6 +260,8 @@ func (c *ControllerConfig) NewSupportedResourceProvider() (resources.SupportedRe
 	return resources.NewSupportedResourceProvider(configured), nil
 }
 
+const routerAudience = "grafana"
+
 // Clients Clients are clients that are used to connect to the different API servers.
 func (c *ControllerConfig) Clients() (resources.ClientFactory, error) {
 	if c.clients != nil {
@@ -297,7 +299,7 @@ func (c *ControllerConfig) Clients() (resources.ClientFactory, error) {
 		Host:    aggregatedServerURL,
 		WrapTransport: clientauth.NewTokenExchangeTransportWrapper(
 			tokenExchangeClient,
-			clientauth.NewStaticAudienceProvider(provisioning.GROUP, resources.DashboardResource.Group, resources.FolderResource.Group),
+			clientauth.NewRequestGroupAudienceProvider(routerAudience, provisioning.GROUP),
 			clientauth.NewStaticNamespaceProvider(clientauth.WildcardNamespace),
 		),
 		Transport: &http.Transport{
@@ -311,7 +313,7 @@ func (c *ControllerConfig) Clients() (resources.ClientFactory, error) {
 
 	c.manifestWatcher, err = resources.NewRemoteManifestWatcher(supportedResourceProvider, c.Registry(), resource.ManifestWatcherConfig{
 		DiscoveryURL:      aggregatedServerURL,
-		DiscoveryAudience: provisioning.GROUP,
+		DiscoveryAudience: routerAudience,
 		Exchanger:         tokenExchangeClient,
 		TLS:               &tlsConfig,
 		PollInterval:      time.Minute,
