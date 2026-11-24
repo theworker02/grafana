@@ -53,6 +53,7 @@ func (c *LegacyClient) LegacySearchUsersPermissions(ctx context.Context, caller 
 	// Cancel the stream when malformed results are rejected before EOF.
 	streamCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
+	//nolint:staticcheck // This adapter intentionally calls the deprecated embedded compatibility RPC.
 	stream, err := c.clientV1.LegacySearchUsersPermissions(streamCtx, &authzv1.LegacySearchUsersPermissionsRequest{
 		Namespace:    req.Namespace,
 		UserId:       req.Options.UserID,

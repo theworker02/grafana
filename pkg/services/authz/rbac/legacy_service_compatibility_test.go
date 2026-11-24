@@ -30,6 +30,7 @@ func TestLegacyCheckServiceDoesNotEnumeratePermissions(t *testing.T) {
 func TestLegacyCheckServiceDoesNotSearchPermissions(t *testing.T) {
 	channel := &inprocgrpc.Channel{}
 	authzv1.RegisterLegacyAuthzServiceServer(channel, &Service{})
+	//nolint:staticcheck // Verify that the deprecated search RPC remains unimplemented here.
 	stream, err := authzv1.NewLegacyAuthzServiceClient(channel).LegacySearchUsersPermissions(t.Context(), &authzv1.LegacySearchUsersPermissionsRequest{
 		Namespace: "default",
 		Action:    "users:read",

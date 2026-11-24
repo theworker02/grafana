@@ -1355,11 +1355,11 @@ const file_legacy_authz_proto_rawDesc = "" +
 	" \x01(\v2\x1a.google.protobuf.TimestampR\aupdated*u\n" +
 	"\x14LegacyCheckErrorCode\x12'\n" +
 	"#LEGACY_CHECK_ERROR_CODE_UNSPECIFIED\x10\x00\x124\n" +
-	"0LEGACY_CHECK_ERROR_CODE_SCOPE_RESOURCE_NOT_FOUND\x10\x012\x99\x03\n" +
+	"0LEGACY_CHECK_ERROR_CODE_SCOPE_RESOURCE_NOT_FOUND\x10\x012\x9e\x03\n" +
 	"\x12LegacyAuthzService\x12^\n" +
 	"\vLegacyCheck\x12&.authz.extention.v1.LegacyCheckRequest\x1a'.authz.extention.v1.LegacyCheckResponse\x12\x8c\x01\n" +
-	"\x18LegacyGetUserPermissions\x123.authz.extention.v1.LegacyGetUserPermissionsRequest\x1a4.authz.extention.v1.LegacyGetUserPermissionsResponse\"\x03\x88\x02\x010\x01\x12\x93\x01\n" +
-	"\x1cLegacySearchUsersPermissions\x127.authz.extention.v1.LegacySearchUsersPermissionsRequest\x1a8.authz.extention.v1.LegacySearchUsersPermissionsResponse0\x01B8Z6github.com/grafana/grafana/pkg/services/authz/proto/v1b\x06proto3"
+	"\x18LegacyGetUserPermissions\x123.authz.extention.v1.LegacyGetUserPermissionsRequest\x1a4.authz.extention.v1.LegacyGetUserPermissionsResponse\"\x03\x88\x02\x010\x01\x12\x98\x01\n" +
+	"\x1cLegacySearchUsersPermissions\x127.authz.extention.v1.LegacySearchUsersPermissionsRequest\x1a8.authz.extention.v1.LegacySearchUsersPermissionsResponse\"\x03\x88\x02\x010\x01B8Z6github.com/grafana/grafana/pkg/services/authz/proto/v1b\x06proto3"
 
 var (
 	file_legacy_authz_proto_rawDescOnce sync.Once

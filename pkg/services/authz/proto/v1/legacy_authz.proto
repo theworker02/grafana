@@ -18,7 +18,11 @@ service LegacyAuthzService {
   }
 
   // LegacySearchUsersPermissions is available only on Grafana's private embedded channel.
-  rpc LegacySearchUsersPermissions(LegacySearchUsersPermissionsRequest) returns (stream LegacySearchUsersPermissionsResponse);
+  //
+  // Deprecated: transitional compatibility API for legacy permission search.
+  rpc LegacySearchUsersPermissions(LegacySearchUsersPermissionsRequest) returns (stream LegacySearchUsersPermissionsResponse) {
+    option deprecated = true;
+  }
 }
 
 message LegacyCheckRequest {

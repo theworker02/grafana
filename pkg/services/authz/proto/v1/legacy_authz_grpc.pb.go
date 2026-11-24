@@ -36,7 +36,10 @@ type LegacyAuthzServiceClient interface {
 	// Deprecated: Do not use.
 	// Deprecated: transitional compatibility API for legacy permission enumeration.
 	LegacyGetUserPermissions(ctx context.Context, in *LegacyGetUserPermissionsRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[LegacyGetUserPermissionsResponse], error)
+	// Deprecated: Do not use.
 	// LegacySearchUsersPermissions is available only on Grafana's private embedded channel.
+	//
+	// Deprecated: transitional compatibility API for legacy permission search.
 	LegacySearchUsersPermissions(ctx context.Context, in *LegacySearchUsersPermissionsRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[LegacySearchUsersPermissionsResponse], error)
 }
 
@@ -78,6 +81,7 @@ func (c *legacyAuthzServiceClient) LegacyGetUserPermissions(ctx context.Context,
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type LegacyAuthzService_LegacyGetUserPermissionsClient = grpc.ServerStreamingClient[LegacyGetUserPermissionsResponse]
 
+// Deprecated: Do not use.
 func (c *legacyAuthzServiceClient) LegacySearchUsersPermissions(ctx context.Context, in *LegacySearchUsersPermissionsRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[LegacySearchUsersPermissionsResponse], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	stream, err := c.cc.NewStream(ctx, &LegacyAuthzService_ServiceDesc.Streams[1], LegacyAuthzService_LegacySearchUsersPermissions_FullMethodName, cOpts...)
@@ -109,7 +113,10 @@ type LegacyAuthzServiceServer interface {
 	// Deprecated: Do not use.
 	// Deprecated: transitional compatibility API for legacy permission enumeration.
 	LegacyGetUserPermissions(*LegacyGetUserPermissionsRequest, grpc.ServerStreamingServer[LegacyGetUserPermissionsResponse]) error
+	// Deprecated: Do not use.
 	// LegacySearchUsersPermissions is available only on Grafana's private embedded channel.
+	//
+	// Deprecated: transitional compatibility API for legacy permission search.
 	LegacySearchUsersPermissions(*LegacySearchUsersPermissionsRequest, grpc.ServerStreamingServer[LegacySearchUsersPermissionsResponse]) error
 }
 

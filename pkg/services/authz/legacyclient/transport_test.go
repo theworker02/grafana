@@ -194,6 +194,7 @@ func TestLegacyAuthzServiceIsSeparate(t *testing.T) {
 	search := legacy.Methods().ByName("LegacySearchUsersPermissions")
 	require.NotNil(t, search)
 	require.True(t, search.IsStreamingServer())
+	require.True(t, search.Options().(*descriptorpb.MethodOptions).GetDeprecated())
 	enumeration := legacy.Methods().ByName("LegacyGetUserPermissions")
 	require.NotNil(t, enumeration)
 	require.True(t, enumeration.IsStreamingServer())
