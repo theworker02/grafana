@@ -193,6 +193,7 @@ const (
 	loadError   = "error"
 
 	resultAttribute = "swrcache.result"
+	keyAttribute    = "swrcache.key"
 )
 
 type metrics struct {
@@ -331,7 +332,8 @@ func (c *Cache[K, V]) get(ctx context.Context, key K) (V, string, error) {
 func (c *Cache[K, V]) run(ctx context.Context, key K, e *entry[V], gen uint64, flt *flight[V]) {
 	loadCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), c.opts.LoadTimeout)
 	defer cancel()
-	spanCtx, span := c.tracer.Start(loadCtx, c.opts.MetricsPrefix+".load")
+	spanCtx, span := c.tracer.Start(loadCtx, c.opts.MetricsPrefix+".load",
+		trace.WithAttributes(attribute.String(keyAttribute, fmt.Sprint(key))))
 	start := time.Now()
 
 	var (
