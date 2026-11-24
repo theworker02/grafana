@@ -2,6 +2,7 @@ package historian
 
 import (
 	"context"
+	"net/http"
 
 	authtypes "github.com/grafana/authlib/types"
 	"k8s.io/apiserver/pkg/authorization/authorizer"
@@ -54,11 +55,14 @@ func RegisterAppInstaller(
 				return nil, err
 			}
 
+			loki := historianAppConfig.LokiConfig{LokiConfig: lokiConfig}
+			if nhCfg.LokiInjectUser {
+				loki.Transport = lokiconfig.NewInjectUserTransport(http.DefaultTransport)
+			}
+
 			appSpecificConfig.Notification = historianAppConfig.NotificationConfig{
 				Enabled: nhCfg.Enabled,
-				Loki: historianAppConfig.LokiConfig{
-					LokiConfig: lokiConfig,
-				},
+				Loki:    loki,
 				// Restrict notification history to the folders whose alert rules the
 				// caller can read. RBAC resolves accessible folders via the folder API
 				// and the multi-tenant authz service, so it works in the standalone
